@@ -11,7 +11,7 @@ class Controller extends BaseController
     protected function getErrorValidateResponse($validator)
     {
         return response()->json([
-            'error' => 422,
+            'status' => 'error',
             'message' => 'Ошибка валидации',
             'validator' => $validator->errors()
         ], 422);

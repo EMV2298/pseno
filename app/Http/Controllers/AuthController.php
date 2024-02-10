@@ -69,7 +69,7 @@ class AuthController extends Controller
         $token = Auth::login($user);
         return response()->json([
             'status' => 'success',
-            'message' => 'User created successfully',
+            'message' => 'Успешно',
             'user' => $user,
             'authorisation' => [
                 'token' => $token,
@@ -83,7 +83,7 @@ class AuthController extends Controller
         Auth::logout();
         return response()->json([
             'status' => 'success',
-            'message' => 'Successfully logged out',
+            'message' => 'Успешно',
         ]);
     }
 
@@ -91,6 +91,7 @@ class AuthController extends Controller
     {
         return response()->json([
             'status' => 'success',
+            'message' => 'Успешно',
             'user' => Auth::user(),
             'authorisation' => [
                 'token' => Auth::refresh(),
