@@ -8,5 +8,12 @@ use Illuminate\Routing\Controller as BaseController;
 
 class Controller extends BaseController
 {
- 
+    protected function getErrorValidateResponse($validator)
+    {
+        return response()->json([
+            'error' => 422,
+            'message' => 'Ошибка валидации',
+            'validator' => $validator->errors()
+        ], 422);
+    }
 }
