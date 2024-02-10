@@ -27,6 +27,7 @@ services:
             - meilisearch
             - mailpit
             - selenium
+            - phpmyadmin
     mysql:
         image: 'mysql/mysql-server:8.0'
         ports:
@@ -51,6 +52,20 @@ services:
                 - '-p${DB_PASSWORD}'
             retries: 3
             timeout: 5s
+
+    phpmyadmin:
+       image: 'phpmyadmin:latest'
+       ports:
+          - 8080:80
+       networks:
+          - sail
+       environment:
+          - PMA_ARBITRARY=1
+          - PMA_HOST=mysql
+          - UPLOAD_LIMIT=1024M
+          - MEMORY_LIMIT=1024M
+          - MAX_EXECUTION_TIME=300  
+
     redis:
         image: 'redis:alpine'
         ports:
