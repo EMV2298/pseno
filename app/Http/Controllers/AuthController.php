@@ -7,13 +7,16 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
+use Illuminate\Support\Str;
+use App\Models\UserRefreshToken;
+use Illuminate\Support\Facades\Cookie;
 
 class AuthController extends Controller
 {
 
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'register']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register', 'refresh']]);
     }
 
     public function login(Request $request)
@@ -35,8 +38,12 @@ class AuthController extends Controller
                 'message' => 'Unauthorized',
             ], 401);
         }
+        $refreshTokenModel = UserRefreshToken::where('user_id', Auth::id())->first();
+        $refreshToken = $refreshTokenModel ? $refreshTokenModel->token : $this->generateRefreshToken();
+        $cookie = $this->getCookieRefreshToken($refreshToken);
 
         $user = Auth::user();
+
         return response()->json([
             'status' => 'success',
             'user' => $user,
@@ -44,7 +51,7 @@ class AuthController extends Controller
                 'token' => $token,
                 'type' => 'bearer',
             ]
-        ]);
+        ])->cookie($cookie);
     }
 
     public function register(Request $request)
@@ -67,6 +74,8 @@ class AuthController extends Controller
         ]);
 
         $token = Auth::login($user);
+        $refreshToken = $this->generateRefreshToken();
+        $cookie = $this->getCookieRefreshToken($refreshToken);
         return response()->json([
             'status' => 'success',
             'message' => 'Успешно',
@@ -75,11 +84,20 @@ class AuthController extends Controller
                 'token' => $token,
                 'type' => 'bearer',
             ]
-        ]);
+        ])->cookie($cookie);
     }
 
     public function logout()
     {
+        $refreshTokenModel = UserRefreshToken::where('user_id', Auth::id())->first();
+        if(!$refreshTokenModel)
+        {
+            return response([
+                'status' => 'error',
+                'message' => 'Не найден refresh token'
+            ], 400);
+        }
+        $refreshTokenModel->delete();
         Auth::logout();
         return response()->json([
             'status' => 'success',
@@ -89,6 +107,34 @@ class AuthController extends Controller
 
     public function refresh()
     {
+        $refreshToken = Cookie::get('refresh-token');
+        if(!$refreshToken)
+        {
+            return response([
+                'status' => 'error',
+                'message' => 'Не найден refresh token'
+            ], 400);
+        }
+        $refreshTokenModel = UserRefreshToken::where('token', $refreshToken)->first();
+        if(!$refreshTokenModel)
+        {
+            return response([
+                'status' => 'error',
+                'message' => 'Не найден refresh token'
+            ], 400);
+        }
+        $user = User::find($refreshTokenModel->user_id);
+
+        if(!$user)
+        {
+            return response([
+                'status' => 'error',
+                'message' => 'Не найден пользователь'
+            ], 400);
+        }
+
+        Auth::login($user);
+
         return response()->json([
             'status' => 'success',
             'message' => 'Успешно',
@@ -98,5 +144,20 @@ class AuthController extends Controller
                 'type' => 'bearer',
             ]
         ]);
+    }
+
+    private function generateRefreshToken()
+    {
+        $refreshToken = Str::random(150);
+        $userRefreshToken = new UserRefreshToken();
+        $userRefreshToken->user_id = Auth::id();
+        $userRefreshToken->token = $refreshToken;
+        $userRefreshToken->save();
+        return $refreshToken;
+    }
+
+    private function getCookieRefreshToken($token)
+    {
+        return cookie('refresh-token', $token, 60 * 24 * 365, '/api/refresh', null, false, true, false, 'none');
     }
 }
