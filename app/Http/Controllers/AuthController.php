@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -46,7 +47,7 @@ class AuthController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'user' => $user,
+            'user' => new UserResource($user),
             'authorisation' => [
                 'token' => $token,
                 'type' => 'bearer',
@@ -79,7 +80,7 @@ class AuthController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Успешно',
-            'user' => $user,
+            'user' => new UserResource($user),
             'authorisation' => [
                 'token' => $token,
                 'type' => 'bearer',
@@ -138,7 +139,7 @@ class AuthController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Успешно',
-            'user' => Auth::user(),
+            'user' => new UserResource($user),
             'authorisation' => [
                 'token' => Auth::refresh(),
                 'type' => 'bearer',
