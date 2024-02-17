@@ -20,6 +20,7 @@ class PostResource extends JsonResource
             'type' => $this->type_id,
             'title' => $this->header,
             'content' => $this->getContent(),
+            'quote_author' => $this->quote_author,
             'views' => $this->view_count,
             'likes' => count($this->likes),
             'reposts'=> count($this->reposts),

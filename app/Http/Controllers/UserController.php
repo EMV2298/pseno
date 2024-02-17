@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\UserProfileResource;
-use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +16,7 @@ class UserController extends Controller
 
     public function getOne(Request $request)
     {
-        $userId = $request->get('userId');
+        $userId = $request->get('id');
         
         if(!$userId)
         {
@@ -26,9 +25,6 @@ class UserController extends Controller
 
         $user = User::findOrFail($userId);
 
-        return response([
-            'status' => 'success',
-            'user' => new UserProfileResource($user)
-        ]);
+        return response([new UserProfileResource($user)]);
     }
 }

@@ -2,11 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
-use App\Http\Resources\PostCollection;
-use App\Http\Resources\PostResource;
-use App\Models\Post;
-use App\Models\TypeContent;
 
 Route::controller(AuthController::class)->group(function () {
     Route::post('login', 'login');
@@ -21,15 +18,8 @@ Route::controller(UserController::class)->group(function () {
     Route::get('user/subscription', 'subscription');
 });
 
-
-Route::get('/post/{id}', function ($id) {
-    return new PostResource(Post::findOrFail($id));
-});
-
-Route::get('/post', function () {
-    return new PostCollection(Post::all());
-});
-
-Route::get('/type', function () {
-    return TypeContent::all();
+Route::controller(PostController::class)->group(function () {
+    Route::get('/post', 'getOne');
+    Route::get('/post/feed', 'feed');
+    Route::get('/post/user', 'byUser');
 });
