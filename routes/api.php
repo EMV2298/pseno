@@ -2,12 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 use App\Http\Resources\PostCollection;
 use App\Http\Resources\PostResource;
-use App\Http\Resources\UserResource;
 use App\Models\Post;
 use App\Models\TypeContent;
-use App\Models\User;
 
 Route::controller(AuthController::class)->group(function () {
     Route::post('login', 'login');
@@ -16,9 +15,12 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('refresh', 'refresh');
 });
 
-Route::get('/user/{id}', function ($id) {
-    return new UserResource(User::findOrFail($id));
+Route::controller(UserController::class)->group(function () {
+    Route::get('/user', 'getOne');
+    Route::get('user/like', 'like');
+    Route::get('user/subscription', 'subscription');
 });
+
 
 Route::get('/post/{id}', function ($id) {
     return new PostResource(Post::findOrFail($id));

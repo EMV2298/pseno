@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Validation\UnauthorizedException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -27,9 +28,17 @@ class Handler extends ExceptionHandler
         $this->renderable(function (UnauthorizedException $e, $request) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Доступ запрещен',
-            ], 403);
+                'message' => 'Unauthorized',
+            ], 401);
         });
+
+        $this->renderable(function (NotFoundHttpException $e, $request) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Запись не найдена',
+            ], 404);
+        });
+
         $this->reportable(function (Throwable $e) {
             //
         });
